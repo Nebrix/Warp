@@ -16,9 +16,7 @@ const (
 	repositoryLink = "https://github.com/Nebrix/Nebrix-PackageManager.git"
 )
 
-const (
-	version = "1.1.6"
-)
+var version = "1.1.6"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -80,34 +78,32 @@ func update() {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
-	version := strings.TrimSpace(string(versionData))
+	latestCommitHash := strings.TrimSpace(string(versionData))
 
-	fmt.Println("Latest commit hash:", version)
+	fmt.Println("Latest commit hash:", latestCommitHash)
 
-	cacheFile := filepath.Join(cacheDir, "version")
-
-	if _, err := os.Stat(cacheFile); err == nil {
-		cacheData, err := os.ReadFile(cacheFile)
-		if err != nil {
+	// Compare the latest commit hash with your application's version
+	if latestCommitHash == version {
+		fmt.Println("You're already up to date!")
+		if err := os.RemoveAll(cacheDir); err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)
 		}
-		if version == string(cacheData) {
-			fmt.Println("You're already up to date!")
-			if err := os.RemoveAll(cacheDir); err != nil {
-				fmt.Println("Error:", err)
-				os.Exit(1)
-			}
+	} else {
+		fmt.Println("Updating to the latest version...")
+		cmd = exec.Command("git", "pull", repositoryLink)
+		cmd.Dir = updateCache
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
 		}
-	}
 
-	cmd = exec.Command("git", "pull", repositoryLink)
-	cmd.Dir = updateCache
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
+		// Update the application version to the latest commit hash
+		version = latestCommitHash
+
+		fmt.Println("Update completed.")
 	}
 
 	os.Exit(exitSuccess)
