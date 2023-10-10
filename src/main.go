@@ -16,7 +16,7 @@ const (
 	repositoryLink = "https://github.com/Nebrix/Nebrix-PackageManager.git"
 )
 
-var version = "1.1.6"
+var version = "9.9.9"
 
 func main() {
 	if len(os.Args) < 2 {
