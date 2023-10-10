@@ -1,33 +1,17 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"strings"
-	"time"
 )
 
 const (
-	exitSuccess    = 0
-	repositoryLink = "https://github.com/Nebrix/Nebrix-PackageManager.git"
+	version = "0.0.2"
 )
-
-var version string
-
-func init() {
-	var err error
-	version, err = getVersionNumber()
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -46,8 +30,6 @@ func main() {
 		installPackage(packageName)
 	case "list":
 		listAllPackages()
-	case "update":
-		update()
 	case "--help", "-h", "help":
 		help()
 	case "--version", "-v":
@@ -56,104 +38,6 @@ func main() {
 		fmt.Println("Error: Unknown command:", command)
 		os.Exit(1)
 	}
-}
-
-func update() {
-	baseDir, err := os.Getwd()
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	cacheDir := filepath.Join(baseDir, "cache")
-	if err := os.MkdirAll(cacheDir, os.ModePerm); err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	cmd := exec.Command("git", "clone", repositoryLink, cacheDir)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	cacheFile := filepath.Join(cacheDir, "version")
-	time.Sleep(5 * time.Second)
-
-	updateCache := filepath.Join(baseDir, "cache")
-	versionPath := filepath.Join(updateCache, "version")
-
-	time.Sleep(5 * time.Second)
-
-	versionData, err := os.ReadFile(versionPath)
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-	version := string(versionData)
-	time.Sleep(1 * time.Second)
-
-	fmt.Println(version)
-
-	if _, err := os.Stat(cacheFile); err == nil {
-		cacheData, err := os.ReadFile(cacheFile)
-		if err != nil {
-			fmt.Println("Error:", err)
-			os.Exit(1)
-		}
-		if version == string(cacheData) {
-			fmt.Println("You're already up to date!")
-			if err := os.RemoveAll(cacheDir); err != nil {
-				fmt.Println("Error:", err)
-				os.Exit(1)
-			}
-		}
-	}
-
-	if err := os.RemoveAll(cacheDir); err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	cmd = exec.Command("git", "pull", repositoryLink)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	os.Exit(exitSuccess)
-}
-
-func getVersionNumber() (string, error) {
-	file, err := os.Open("version")
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		parts := strings.Split(line, "=")
-		if len(parts) == 2 {
-			key := strings.TrimSpace(parts[0])
-			value := strings.TrimSpace(parts[1])
-
-			if key == "VERSION" {
-				return value, nil
-			}
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		return "", err
-	}
-
-	return "", nil
 }
 
 func installPackage(packageName string) {
@@ -290,13 +174,10 @@ func help() {
 	helpText := `
 Usage:
   nebrix <command> [options]
-
 Commands:
   add        Install a package.
   list       List installed packages.
   help       Show help for commands.
-  update	 Updates to current version.
-
 Options:
   -h, --help     Show help.
   -v, --version  Show version and exit.
