@@ -101,11 +101,6 @@ func update() {
 		}
 	}
 
-	if err := os.RemoveAll(cacheDir); err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
 	cmd = exec.Command("git", "pull", repositoryLink)
 	cmd.Dir = updateCache
 	cmd.Stdout = os.Stdout
