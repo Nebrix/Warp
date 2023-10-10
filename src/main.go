@@ -295,6 +295,7 @@ Commands:
   add        Install a package.
   list       List installed packages.
   help       Show help for commands.
+  update	 Updates to current version.
 
 Options:
   -h, --help     Show help.
