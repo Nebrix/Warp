@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 const (
@@ -16,7 +18,16 @@ const (
 	repositoryLink = "https://github.com/Nebrix/Nebrix-PackageManager.git"
 )
 
-var version = "9.9.9"
+var version string
+
+func init() {
+	var err error
+	version, err = getVersionNumber()
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -68,45 +79,81 @@ func update() {
 		os.Exit(1)
 	}
 
+	cacheFile := filepath.Join(cacheDir, "version")
+	time.Sleep(5 * time.Second)
+
 	updateCache := filepath.Join(baseDir, "cache")
+	versionPath := filepath.Join(updateCache, "version")
 
-	cmd = exec.Command("git", "rev-parse", "HEAD")
-	cmd.Dir = updateCache
+	time.Sleep(5 * time.Second)
 
-	versionData, err := cmd.Output()
+	versionData, err := os.ReadFile(versionPath)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
-	latestCommitHash := strings.TrimSpace(string(versionData))
+	version := string(versionData)
+	time.Sleep(1 * time.Second)
 
-	fmt.Println("Latest commit hash:", latestCommitHash)
+	fmt.Println(version)
 
-	// Compare the latest commit hash with your application's version
-	if latestCommitHash == version {
-		fmt.Println("You're already up to date!")
-		if err := os.RemoveAll(cacheDir); err != nil {
+	if _, err := os.Stat(cacheFile); err == nil {
+		cacheData, err := os.ReadFile(cacheFile)
+		if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)
 		}
-	} else {
-		fmt.Println("Updating to the latest version...")
-		cmd = exec.Command("git", "pull", repositoryLink)
-		cmd.Dir = updateCache
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err != nil {
-			fmt.Println("Error:", err)
-			os.Exit(1)
+		if version == string(cacheData) {
+			fmt.Println("You're already up to date!")
+			if err := os.RemoveAll(cacheDir); err != nil {
+				fmt.Println("Error:", err)
+				os.Exit(1)
+			}
 		}
+	}
 
-		// Update the application version to the latest commit hash
-		version = latestCommitHash
+	if err := os.RemoveAll(cacheDir); err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
 
-		fmt.Println("Update completed.")
+	cmd = exec.Command("git", "pull", repositoryLink)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
 	}
 
 	os.Exit(exitSuccess)
+}
+
+func getVersionNumber() (string, error) {
+	file, err := os.Open("version")
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Split(line, "=")
+		if len(parts) == 2 {
+			key := strings.TrimSpace(parts[0])
+			value := strings.TrimSpace(parts[1])
+
+			if key == "VERSION" {
+				return value, nil
+			}
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", err
+	}
+
+	return "", nil
 }
 
 func installPackage(packageName string) {
