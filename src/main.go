@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,7 +9,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 const (
@@ -18,16 +16,9 @@ const (
 	repositoryLink = "https://github.com/Nebrix/Nebrix-PackageManager.git"
 )
 
-var version string
-
-func init() {
-	var err error
-	version, err = getVersionNumber()
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-}
+const (
+	version = "0.0.3"
+)
 
 func main() {
 	if len(os.Args) < 2 {
@@ -79,23 +70,21 @@ func update() {
 		os.Exit(1)
 	}
 
-	cacheFile := filepath.Join(cacheDir, "version")
-	time.Sleep(5 * time.Second)
-
 	updateCache := filepath.Join(baseDir, "cache")
-	versionPath := filepath.Join(updateCache, "version")
 
-	time.Sleep(5 * time.Second)
+	cmd = exec.Command("git", "rev-parse", "HEAD")
+	cmd.Dir = updateCache
 
-	versionData, err := os.ReadFile(versionPath)
+	versionData, err := cmd.Output()
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
-	version := string(versionData)
-	time.Sleep(1 * time.Second)
+	version := strings.TrimSpace(string(versionData))
 
-	fmt.Println(version)
+	fmt.Println("Latest commit hash:", version)
+
+	cacheFile := filepath.Join(cacheDir, "version")
 
 	if _, err := os.Stat(cacheFile); err == nil {
 		cacheData, err := os.ReadFile(cacheFile)
@@ -118,6 +107,7 @@ func update() {
 	}
 
 	cmd = exec.Command("git", "pull", repositoryLink)
+	cmd.Dir = updateCache
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -126,34 +116,6 @@ func update() {
 	}
 
 	os.Exit(exitSuccess)
-}
-
-func getVersionNumber() (string, error) {
-	file, err := os.Open("version")
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		parts := strings.Split(line, "=")
-		if len(parts) == 2 {
-			key := strings.TrimSpace(parts[0])
-			value := strings.TrimSpace(parts[1])
-
-			if key == "VERSION" {
-				return value, nil
-			}
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		return "", err
-	}
-
-	return "", nil
 }
 
 func installPackage(packageName string) {
