@@ -13,5 +13,10 @@ If you are using a Red Hat-based system, such as Red Hat Enterprise Linux or Cen
 If you are using another Linux-based system, you can compile Nebrix-PackageManager using the following command:
 ```
 go build -o nebrix src/main.go
+alias nebrix='./nebrix'
 ```
 This will compile and build Nebrix-PackageManager for your system.
+
+
+## Note 
+if you use the .deb or .rpm updating from command line is not available yet
