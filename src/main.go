@@ -4,13 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"nebrix-package/src/version"
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"time"
 )
 
 const (
-	version = "0.0.2"
+	exitSuccess    = 0
+	repositoryLink = "https://github.com/Nebrix/Nebrix-PackageManager.git"
 )
 
 func main() {
@@ -33,11 +37,83 @@ func main() {
 	case "--help", "-h", "help":
 		help()
 	case "--version", "-v":
-		fmt.Println("nebrix version:", version)
+		fmt.Println("nebrix version:", version.Version)
+	case "update":
+		update()
 	default:
 		fmt.Println("Error: Unknown command:", command)
 		os.Exit(1)
 	}
+}
+
+func update() {
+	baseDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+
+	cacheDir, err := os.MkdirTemp("", "cache")
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+
+	cmd := exec.Command("git", "clone", repositoryLink, cacheDir)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+
+	cacheFile := filepath.Join(cacheDir, "version")
+	time.Sleep(5 * time.Second)
+
+	pmCache := filepath.Join(baseDir, "cache")
+	versionPath := filepath.Join(pmCache, "version")
+
+	time.Sleep(5 * time.Second)
+
+	versionData, err := os.ReadFile(versionPath)
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+	version := string(versionData)
+	time.Sleep(1 * time.Second)
+
+	fmt.Println("Version:", version)
+
+	if _, err := os.Stat(cacheFile); err == nil {
+		cacheData, err := os.ReadFile(cacheFile)
+		if err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
+		if version == string(cacheData) {
+			fmt.Println("You're already up to date!")
+			if err := os.RemoveAll(cacheDir); err != nil {
+				fmt.Println("Error:", err)
+				os.Exit(1)
+			}
+		}
+	}
+
+	if err := os.RemoveAll(cacheDir); err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+
+	cmd = exec.Command("git", "pull", repositoryLink)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+
+	os.Exit(exitSuccess)
 }
 
 func installPackage(packageName string) {
