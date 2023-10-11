@@ -16,6 +16,7 @@ import (
 const (
 	exitSuccess    = 0
 	repositoryLink = "https://github.com/Nebrix/Nebrix-PackageManager.git"
+	formatString   = `const Version = "%s"`
 )
 
 func main() {
@@ -79,7 +80,7 @@ func update() {
 	}
 
 	var version string
-	_, err = fmt.Sscanf(string(versionData), `const Version = "%s"`, &version)
+	_, err = fmt.Sscanf(string(versionData), formatString, &version)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
