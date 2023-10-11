@@ -3,20 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"go/build"
 	"io/ioutil"
-	"nebrix-package/src/version"
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"strings"
 )
 
 const (
-	exitSuccess    = 0
-	repositoryLink = "https://github.com/Nebrix/Nebrix-PackageManager.git"
-	formatString   = `const Version = "%s"`
+	version = "0.0.2"
 )
 
 func main() {
@@ -39,87 +33,11 @@ func main() {
 	case "--help", "-h", "help":
 		help()
 	case "--version", "-v":
-		fmt.Println("nebrix version:", version.Version)
-	case "update":
-		update()
+		fmt.Println("nebrix version:", version)
 	default:
 		fmt.Println("Error: Unknown command:", command)
 		os.Exit(1)
 	}
-}
-
-func update() {
-	cacheVersionPkg, err := build.Import("nebrix-package/src/version", "", build.FindOnly)
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	cacheDir, err := os.MkdirTemp("", "cache")
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	cmd := exec.Command("git", "clone", repositoryLink, cacheDir)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	cacheVersionPath := filepath.Join(cacheVersionPkg.Dir, "version.go")
-	projectVersionPath := filepath.Join("nebrix-package/src/version", "version.go")
-
-	cacheVersionData, err := os.ReadFile(cacheVersionPath)
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	projectVersionData, err := os.ReadFile(projectVersionPath)
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	cacheVersion := extractVersion(cacheVersionData)
-	projectVersion := extractVersion(projectVersionData)
-
-	if cacheVersion != projectVersion {
-		fmt.Println("Updating to version:", cacheVersion)
-
-		updatedVersionData := []byte(fmt.Sprintf("package version\n\nconst Version = \"%s\"\n", cacheVersion))
-		if err := os.WriteFile(projectVersionPath, updatedVersionData, 0644); err != nil {
-			fmt.Println("Error updating version in project:", err)
-			os.Exit(1)
-		}
-	} else {
-		fmt.Println("You're already up to date!")
-	}
-
-	if err := os.RemoveAll(cacheDir); err != nil {
-		fmt.Println("Error cleaning up cache:", err)
-	}
-
-	os.Exit(exitSuccess)
-}
-
-func extractVersion(data []byte) string {
-	versionString := string(data)
-	const versionPrefix = "const Version = \""
-	startIndex := strings.Index(versionString, versionPrefix)
-	if startIndex < 0 {
-		return ""
-	}
-	startIndex += len(versionPrefix)
-	endIndex := strings.Index(versionString[startIndex:], "\"")
-	if endIndex < 0 {
-		return ""
-	}
-	endIndex += startIndex
-	return versionString[startIndex:endIndex]
 }
 
 func installPackage(packageName string) {
