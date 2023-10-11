@@ -50,7 +50,7 @@ func main() {
 
 func update() {
 	// Use the go/build package to read the version from version/version.go in the cache
-	cacheVersionPkg, err := build.Import("myproject/version", "", build.FindOnly)
+	cacheVersionPkg, err := build.Import("nebrix-package/src/version", "", build.FindOnly)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
