@@ -51,7 +51,7 @@ func main() {
 
 func update() {
 	// Use the go/build package to read the version from version/version.go
-	versionPkg, err := build.Import("myproject/version", "", build.FindOnly)
+	versionPkg, err := build.Import("nebrix-package/src/version", "", build.FindOnly)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
