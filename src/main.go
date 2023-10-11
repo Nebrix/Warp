@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 const (
@@ -50,19 +49,21 @@ func main() {
 }
 
 func update() {
-	// Use the go/build package to read the version from version/version.go
-	versionPkg, err := build.Import("nebrix-package/src/version", "", build.FindOnly)
+	// Use the go/build package to read the version from version/version.go in the cache
+	cacheVersionPkg, err := build.Import("myproject/version", "", build.FindOnly)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 
+	// Create a temporary cache directory
 	cacheDir, err := os.MkdirTemp("", "cache")
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 
+	// Clone the repository into the cache directory
 	cmd := exec.Command("git", "clone", repositoryLink, cacheDir)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -71,51 +72,65 @@ func update() {
 		os.Exit(1)
 	}
 
-	cacheFile := filepath.Join(cacheDir, "version")
-	time.Sleep(5 * time.Second)
+	// Define paths to version.go in both the cache and the project
+	cacheVersionPath := filepath.Join(cacheVersionPkg.Dir, "version.go")
+	projectVersionPath := filepath.Join("myproject/version", "version.go")
 
-	versionPath := filepath.Join(versionPkg.Dir, "version.go")
-	versionData, err := os.ReadFile(versionPath)
+	// Read the version directly from the version.go file in the cache
+	cacheVersionData, err := os.ReadFile(cacheVersionPath)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 
-	// Read the version directly from the version.go file
-	version := strings.TrimPrefix(string(versionData), "const Version = ")
-	version = strings.Trim(version, "\"")
+	// Read the version directly from the version.go file in the project
+	projectVersionData, err := os.ReadFile(projectVersionPath)
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
 
-	fmt.Println("Version:", version)
+	// Extract versions from both cache and project
+	cacheVersion := extractVersion(cacheVersionData)
+	projectVersion := extractVersion(projectVersionData)
 
-	if _, err := os.Stat(cacheFile); err == nil {
-		cacheData, err := os.ReadFile(cacheFile)
-		if err != nil {
-			fmt.Println("Error:", err)
+	// Check if the cache version is newer
+	if cacheVersion != projectVersion {
+		fmt.Println("Updating to version:", cacheVersion)
+
+		// Update the version in the project's version.go
+		updatedVersionData := []byte(fmt.Sprintf("package version\n\nconst Version = \"%s\"\n", cacheVersion))
+		if err := os.WriteFile(projectVersionPath, updatedVersionData, 0644); err != nil {
+			fmt.Println("Error updating version in project:", err)
 			os.Exit(1)
 		}
-		if version == string(cacheData) {
-			fmt.Println("You're already up to date!")
-			if err := os.RemoveAll(cacheDir); err != nil {
-				fmt.Println("Error:", err)
-				os.Exit(1)
-			}
-		}
+	} else {
+		fmt.Println("You're already up to date!")
 	}
 
+	// Clean up the cache
 	if err := os.RemoveAll(cacheDir); err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	cmd = exec.Command("git", "pull", repositoryLink)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
+		fmt.Println("Error cleaning up cache:", err)
 	}
 
 	os.Exit(exitSuccess)
+}
+
+func extractVersion(data []byte) string {
+	// Extract the version string from the data
+	versionString := string(data)
+	const versionPrefix = "const Version = \""
+	startIndex := strings.Index(versionString, versionPrefix)
+	if startIndex < 0 {
+		return ""
+	}
+	startIndex += len(versionPrefix)
+	endIndex := strings.Index(versionString[startIndex:], "\"")
+	if endIndex < 0 {
+		return ""
+	}
+	endIndex += startIndex
+	return versionString[startIndex:endIndex]
 }
 
 func installPackage(packageName string) {
