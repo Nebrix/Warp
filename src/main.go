@@ -74,7 +74,7 @@ func update() {
 
 	// Define paths to version.go in both the cache and the project
 	cacheVersionPath := filepath.Join(cacheVersionPkg.Dir, "version.go")
-	projectVersionPath := filepath.Join("myproject/version", "version.go")
+	projectVersionPath := filepath.Join("nebrix-package/src/version", "version.go")
 
 	// Read the version directly from the version.go file in the cache
 	cacheVersionData, err := os.ReadFile(cacheVersionPath)
