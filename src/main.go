@@ -49,21 +49,18 @@ func main() {
 }
 
 func update() {
-	// Use the go/build package to read the version from version/version.go in the cache
 	cacheVersionPkg, err := build.Import("nebrix-package/src/version", "", build.FindOnly)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 
-	// Create a temporary cache directory
 	cacheDir, err := os.MkdirTemp("", "cache")
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 
-	// Clone the repository into the cache directory
 	cmd := exec.Command("git", "clone", repositoryLink, cacheDir)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -76,29 +73,24 @@ func update() {
 	cacheVersionPath := filepath.Join(cacheVersionPkg.Dir, "version.go")
 	projectVersionPath := filepath.Join("nebrix-package/src/version", "version.go")
 
-	// Read the version directly from the version.go file in the cache
 	cacheVersionData, err := os.ReadFile(cacheVersionPath)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 
-	// Read the version directly from the version.go file in the project
 	projectVersionData, err := os.ReadFile(projectVersionPath)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 
-	// Extract versions from both cache and project
 	cacheVersion := extractVersion(cacheVersionData)
 	projectVersion := extractVersion(projectVersionData)
 
-	// Check if the cache version is newer
 	if cacheVersion != projectVersion {
 		fmt.Println("Updating to version:", cacheVersion)
 
-		// Update the version in the project's version.go
 		updatedVersionData := []byte(fmt.Sprintf("package version\n\nconst Version = \"%s\"\n", cacheVersion))
 		if err := os.WriteFile(projectVersionPath, updatedVersionData, 0644); err != nil {
 			fmt.Println("Error updating version in project:", err)
@@ -108,7 +100,6 @@ func update() {
 		fmt.Println("You're already up to date!")
 	}
 
-	// Clean up the cache
 	if err := os.RemoveAll(cacheDir); err != nil {
 		fmt.Println("Error cleaning up cache:", err)
 	}
@@ -117,7 +108,6 @@ func update() {
 }
 
 func extractVersion(data []byte) string {
-	// Extract the version string from the data
 	versionString := string(data)
 	const versionPrefix = "const Version = \""
 	startIndex := strings.Index(versionString, versionPrefix)
