@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"go/build"
 	"io/ioutil"
 	"nebrix-package/src/version"
 	"net/http"
@@ -47,7 +48,7 @@ func main() {
 }
 
 func update() {
-	baseDir, err := os.Getwd()
+	versionPkg, err := build.Import("nebrix-package/src/version", "", build.FindOnly)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
@@ -70,18 +71,19 @@ func update() {
 	cacheFile := filepath.Join(cacheDir, "version")
 	time.Sleep(5 * time.Second)
 
-	pmCache := filepath.Join(baseDir, "cache")
-	versionPath := filepath.Join(pmCache, "version")
-
-	time.Sleep(5 * time.Second)
-
+	versionPath := filepath.Join(versionPkg.Dir, "version.go")
 	versionData, err := os.ReadFile(versionPath)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
-	version := string(versionData)
-	time.Sleep(1 * time.Second)
+
+	var version string
+	_, err = fmt.Sscanf(string(versionData), `const Version = "%s"`, &version)
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
 
 	fmt.Println("Version:", version)
 
