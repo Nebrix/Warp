@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -49,7 +50,8 @@ func main() {
 }
 
 func update() {
-	versionPkg, err := build.Import("nebrix-package/src/version", "", build.FindOnly)
+	// Use the go/build package to read the version from version/version.go
+	versionPkg, err := build.Import("myproject/version", "", build.FindOnly)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
@@ -79,12 +81,9 @@ func update() {
 		os.Exit(1)
 	}
 
-	var version string
-	_, err = fmt.Sscanf(string(versionData), formatString, &version)
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
+	// Read the version directly from the version.go file
+	version := strings.TrimPrefix(string(versionData), "const Version = ")
+	version = strings.Trim(version, "\"")
 
 	fmt.Println("Version:", version)
 
