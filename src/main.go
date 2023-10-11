@@ -49,7 +49,7 @@ func main() {
 }
 
 func update() {
-	cacheVersionPkg, err := build.Import("nebrix-package/src/version", "", build.FindOnly)
+	cacheVersionPkg, err := build.Import("src/version", "", build.FindOnly)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
@@ -71,7 +71,7 @@ func update() {
 
 	// Define paths to version.go in both the cache and the project
 	cacheVersionPath := filepath.Join(cacheVersionPkg.Dir, "version.go")
-	projectVersionPath := filepath.Join("nebrix-package/src/version", "version.go")
+	projectVersionPath := filepath.Join("src/version", "version.go")
 
 	cacheVersionData, err := os.ReadFile(cacheVersionPath)
 	if err != nil {
