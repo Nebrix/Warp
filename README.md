@@ -4,7 +4,7 @@
 Running the Nebrix-Setup on Windows may trigger Windows Defender. To proceed with the installation, you'll need to temporarily allow or disable Windows Defender.
 
 ## Installation Instructions
-To install Nebrix-PackageManager, please follow the appropriate instructions for your Linux distribution =:
+To install Nebrix-PackageManager, please follow the appropriate instructions for your Linux distribution or windows:
 
 ## NT-based Systems (e.g., windows)
 If you are using a NT-based system, such as Windows10 or Windows11, please use the .exe package for installation.
