@@ -6,6 +6,9 @@ Running the Nebrix-Setup on Windows may trigger Windows Defender. To proceed wit
 ## Installation Instructions
 To install Nebrix-PackageManager, please follow the appropriate instructions for your Linux distribution or windows:
 
+## Mac-based System (e.g., MacOS)
+If you are using a Mac-based system, please use the .tar.gz package then run `tar -xzf Nebrix.MacOS.tar.gz`
+
 ## NT-based Systems (e.g., windows)
 If you are using a NT-based system, such as Windows10 or Windows11, please use the .exe package for installation.
 
