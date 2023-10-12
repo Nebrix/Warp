@@ -1,7 +1,13 @@
 # Nebrix-PackageManager
 
+# Important Note
+The windows nebrix-setup will trigger windows defender, if you do want to use it you will have to allow/disable windows defender.
+
 ## Installation Instructions
 To install Nebrix-PackageManager, please follow the appropriate instructions for your Linux distribution:
+
+## NT-based Systems (e.g., windows)
+If you are using a NT-based system, such as Windows10 or Windows11, please use the .exe package for installation.
 
 ## Debian-based Systems (e.g., Debian and Ubuntu)
 If you are using a Debian-based system, such as Debian or Ubuntu, please use the .deb package for installation.
