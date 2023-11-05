@@ -57,7 +57,7 @@ func GithubInstallerHTTP(packageName string) {
 
 	bar := progressbar.DefaultBytes(
 		-1,
-		"Pulling Docker image",
+		"Cloning HTTP package",
 	)
 
 	writer := io.MultiWriter(bar)
@@ -88,7 +88,7 @@ func GithubInstallerSSH(packageName string) {
 
 	bar := progressbar.DefaultBytes(
 		-1,
-		"Pulling Docker image",
+		"Cloning SSH package",
 	)
 
 	writer := io.MultiWriter(bar)
