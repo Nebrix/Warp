@@ -17,7 +17,8 @@ func DockerInstaller(packageName string) {
 	}
 }
 
-func GithubInstaller(packageName string) {
+func GithubInstallerHTTP(packageName string) {
+	//	fmt.Println("Cloning HTTP package")
 	cmdHTTPS := exec.Command("git", "clone", "https://github.com/Nebrix/"+packageName+".git")
 	cmdHTTPS.Stdout = os.Stdout
 	cmdHTTPS.Stderr = os.Stderr
@@ -25,9 +26,19 @@ func GithubInstaller(packageName string) {
 
 	if errHTTPS != nil {
 		fmt.Println("HTTPS Clone Error:", errHTTPS)
-		fmt.Println("Trying SSH...")
-		cmdSSH := exec.Command("git", "clone", "git@github.com:Nebrix/"+packageName+".git")
-		cmdSSH.Stdout = os.Stdout
-		cmdSSH.Stderr = os.Stderr
+		return
+	}
+}
+
+func GithubInstallerSSH(packageName string) {
+	//	fmt.Println("Cloning SSH package")
+	cmdSSH := exec.Command("git", "clone", "git@github.com:Nebrix/"+packageName+".git")
+	cmdSSH.Stdout = os.Stdout
+	cmdSSH.Stderr = os.Stderr
+	errSSH := cmdSSH.Run()
+
+	if errSSH != nil {
+		fmt.Println("SSH Clone Error:", errSSH)
+		return
 	}
 }

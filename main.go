@@ -40,23 +40,36 @@ func main() {
 	switch command {
 	case "install":
 		if len(os.Args) < 3 {
-			fmt.Println("ERROR: You must give at least one requirement to install.")
+			fmt.Println("ERROR: You must provide a package name to install.")
 			os.Exit(1)
 		}
 		packageName := os.Args[2]
-		if dockerFlag {
+		if githubFlag {
+			if len(os.Args) < 4 {
+				fmt.Println("ERROR: You must provide a method for GitHub installation (--ssh or --http).")
+				os.Exit(1)
+			}
+			method := os.Args[3]
+			switch method {
+			case "--ssh":
+				install.GithubInstallerSSH(packageName)
+			case "--http":
+				install.GithubInstallerHTTP(packageName)
+			default:
+				fmt.Println("Error: Unsupported installation method.")
+				os.Exit(1)
+			}
+		} else if dockerFlag {
 			install.DockerInstaller(packageName)
-		} else if githubFlag {
-			install.GithubInstaller(packageName)
 		}
-	case "--help", "-h":
-		help()
 	case "search":
 		if dockerFlag {
 			helper.ListAllPackagesDocker()
 		} else if githubFlag {
 			helper.ListAllPackages()
 		}
+	case "--help", "-h":
+		help()
 	default:
 		fmt.Printf("ERROR: unknown command: %s", command)
 		os.Exit(1)
@@ -69,14 +82,15 @@ Usage:
   warp <command> [options]
 
 Commands:
-  install		Install a package.
-  search	 	List Nebrix for packages.
-  help       		Show help for commands.
+  install     Install a package.
+  search      List Nebrix for packages.
+  help        Show help for commands.
 
 General Options:
-  -h, --help     	Show help.
+  -h, --help      Show help.
 
-  -D, --docker		Runs the docker install.
-  -G, --github  	Runs the github install.`
+  -D, --docker    Runs the docker install.
+  -G, --github    Runs the github install.
+  --ssh, --http	  Runs the github install method.`
 	fmt.Println(helpText)
 }
