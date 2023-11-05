@@ -2,43 +2,103 @@ package install
 
 import (
 	"fmt"
-	"os"
+	"io"
 	"os/exec"
+
+	"github.com/schollz/progressbar/v3"
 )
 
 func DockerInstaller(packageName string) {
 	cmdDOCKER := exec.Command("docker", "pull", "nebrix/"+packageName)
-	cmdDOCKER.Stdout = os.Stdout
-	cmdDOCKER.Stderr = os.Stderr
-	errDOCKER := cmdDOCKER.Run()
 
+	cmdOut, err := cmdDOCKER.StdoutPipe()
+	if err != nil {
+		fmt.Println("Error creating stdout pipe:", err)
+		return
+	}
+
+	errDOCKER := cmdDOCKER.Start()
+	if errDOCKER != nil {
+		fmt.Println("Error starting Docker pull:", errDOCKER)
+		return
+	}
+
+	bar := progressbar.DefaultBytes(
+		-1,
+		"Pulling Docker image",
+	)
+
+	writer := io.MultiWriter(bar)
+
+	go io.Copy(writer, cmdOut)
+
+	errDOCKER = cmdDOCKER.Wait()
 	if errDOCKER != nil {
 		fmt.Println("Error:", errDOCKER)
 	}
+
+	bar.Finish()
 }
 
 func GithubInstallerHTTP(packageName string) {
-	//	fmt.Println("Cloning HTTP package")
 	cmdHTTPS := exec.Command("git", "clone", "https://github.com/Nebrix/"+packageName+".git")
-	cmdHTTPS.Stdout = os.Stdout
-	cmdHTTPS.Stderr = os.Stderr
-	errHTTPS := cmdHTTPS.Run()
 
-	if errHTTPS != nil {
-		fmt.Println("HTTPS Clone Error:", errHTTPS)
+	cmdOut, err := cmdHTTPS.StdoutPipe()
+	if err != nil {
+		fmt.Println("Error creating stdout pipe:", err)
 		return
 	}
+
+	errDOCKER := cmdHTTPS.Start()
+	if errDOCKER != nil {
+		fmt.Println("Error starting Docker pull:", errDOCKER)
+		return
+	}
+
+	bar := progressbar.DefaultBytes(
+		-1,
+		"Pulling Docker image",
+	)
+
+	writer := io.MultiWriter(bar)
+
+	go io.Copy(writer, cmdOut)
+
+	errDOCKER = cmdHTTPS.Wait()
+	if errDOCKER != nil {
+		fmt.Println("Error:", errDOCKER)
+	}
+
+	bar.Finish()
 }
 
 func GithubInstallerSSH(packageName string) {
-	//	fmt.Println("Cloning SSH package")
 	cmdSSH := exec.Command("git", "clone", "git@github.com:Nebrix/"+packageName+".git")
-	cmdSSH.Stdout = os.Stdout
-	cmdSSH.Stderr = os.Stderr
-	errSSH := cmdSSH.Run()
-
-	if errSSH != nil {
-		fmt.Println("SSH Clone Error:", errSSH)
+	cmdOut, err := cmdSSH.StdoutPipe()
+	if err != nil {
+		fmt.Println("Error creating stdout pipe:", err)
 		return
 	}
+
+	errDOCKER := cmdSSH.Start()
+	if errDOCKER != nil {
+		fmt.Println("Error starting Docker pull:", errDOCKER)
+		return
+	}
+
+	bar := progressbar.DefaultBytes(
+		-1,
+		"Pulling Docker image",
+	)
+
+	writer := io.MultiWriter(bar)
+
+	go io.Copy(writer, cmdOut)
+
+	errDOCKER = cmdSSH.Wait()
+	if errDOCKER != nil {
+		fmt.Println("Error:", errDOCKER)
+	}
+
+	bar.Finish()
 }
