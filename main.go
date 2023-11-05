@@ -52,8 +52,11 @@ func main() {
 	case "--help", "-h":
 		help()
 	case "search":
-		helper.ListAllPackages()
-		helper.ListAllPackagesDocker()
+		if dockerFlag {
+			helper.ListAllPackagesDocker()
+		} else if githubFlag {
+			helper.ListAllPackages()
+		}
 	default:
 		fmt.Printf("ERROR: unknown command: %s", command)
 		os.Exit(1)

@@ -138,7 +138,7 @@ func ListAllPackagesDocker() {
 		return
 	}
 
-	fmt.Println("\nPublic Repositories for Nebrix Docker")
+	fmt.Println("Public Repositories for Nebrix Docker")
 
 	for _, repo := range response.Results {
 		fmt.Println(repo.Name)
