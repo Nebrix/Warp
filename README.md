@@ -1,4 +1,4 @@
-# Nebrix-PackageManager Installation Guide
+# Warp Installation Guide
 
 ## Building for Your System
 If you are using any system, you can compile Nebrix-PackageManager using the following command:
