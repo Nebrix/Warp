@@ -68,6 +68,17 @@ func main() {
 		} else if githubFlag {
 			helper.ListAllPackages()
 		}
+	case "remove":
+		if len(os.Args) < 3 {
+			fmt.Println("ERROR: You must provide a package name to remove.")
+			os.Exit(1)
+		}
+		packageName := os.Args[2]
+		if githubFlag {
+			install.RemovePackageGithub(packageName)
+		} else if dockerFlag {
+			install.RemovePackageDocker(packageName)
+		}
 	case "--help", "-h":
 		help()
 	default:
@@ -83,6 +94,7 @@ Usage:
 
 Commands:
   install     Install a package.
+  remove      Remove a package.
   search      List Nebrix for packages.
   help        Show help for commands.
 
