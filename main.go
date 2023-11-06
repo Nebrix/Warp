@@ -18,45 +18,51 @@ func main() {
 		os.Exit(1)
 	}
 
-	for i := 2; i < len(os.Args); i++ {
-		arg := os.Args[i]
-		if arg == "-D" || arg == "--docker" {
+	args := os.Args[1:]
+
+	for i, arg := range args {
+		switch arg {
+		case "-D", "--docker":
 			dockerFlag = true
-			os.Args = append(os.Args[:i], os.Args[i+1:]...)
-			break
-		}
-	}
-
-	for i := 2; i < len(os.Args); i++ {
-		arg := os.Args[i]
-		if arg == "-G" || arg == "--github" {
+			args = append(args[:i], args[i+1:]...)
+		case "-G", "--github":
 			githubFlag = true
-			os.Args = append(os.Args[:i], os.Args[i+1:]...)
-			break
+			args = append(args[:i], args[i+1:]...)
 		}
 	}
 
-	command := os.Args[1]
+	if len(args) < 1 {
+		fmt.Println("ERROR: Missing command.")
+		os.Exit(1)
+	}
+
+	command := args[0]
+	restArgs := args[1:]
+
 	switch command {
 	case "install":
-		if len(os.Args) < 3 {
+		if len(restArgs) < 1 {
 			fmt.Println("ERROR: You must provide a package name to install.")
 			os.Exit(1)
 		}
-		packageName := os.Args[2]
+
+		packageName := restArgs[0]
+
 		if githubFlag {
-			if len(os.Args) < 4 {
-				fmt.Println("ERROR: You must provide a method for GitHub installation (--ssh or --http).")
+			if len(restArgs) < 2 {
+				fmt.Println("ERROR: You must provide an installation method (--ssh or --http).")
 				os.Exit(1)
 			}
-			method := os.Args[3]
+
+			method := restArgs[1]
+
 			switch method {
 			case "--ssh":
 				install.GithubInstallerSSH(packageName)
 			case "--http":
 				install.GithubInstallerHTTP(packageName)
 			default:
-				fmt.Println("Error: Unsupported installation method.")
+				fmt.Println("ERROR: Unsupported installation method.")
 				os.Exit(1)
 			}
 		} else if dockerFlag {
@@ -69,11 +75,13 @@ func main() {
 			helper.ListAllPackages()
 		}
 	case "remove":
-		if len(os.Args) < 3 {
+		if len(restArgs) < 1 {
 			fmt.Println("ERROR: You must provide a package name to remove.")
 			os.Exit(1)
 		}
-		packageName := os.Args[2]
+
+		packageName := restArgs[0]
+
 		if githubFlag {
 			install.RemovePackageGithub(packageName)
 		} else if dockerFlag {
@@ -82,7 +90,7 @@ func main() {
 	case "--help", "-h":
 		help()
 	default:
-		fmt.Printf("ERROR: unknown command: %s", command)
+		fmt.Printf("ERROR: Unknown command: %s\n", command)
 		os.Exit(1)
 	}
 }
@@ -99,10 +107,15 @@ Commands:
   help        Show help for commands.
 
 General Options:
-  -h, --help      Show help.
+  -h, --help    Show this help message.
+  -D, --docker  Install packages using Docker.
+  -G, --github  Install packages from GitHub.
+  --ssh, --http  Specify the installation method for GitHub packages (SSH or HTTP).
 
-  -D, --docker    Runs the docker install.
-  -G, --github    Runs the github install.
-  --ssh, --http	  Runs the github install method.`
+Examples:
+  warp install mypackage -D
+  warp remove anotherpackage -G
+  warp search -D
+`
 	fmt.Println(helpText)
 }
