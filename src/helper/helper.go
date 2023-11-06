@@ -144,3 +144,28 @@ func ListAllPackagesDocker() {
 		fmt.Println(repo.Name)
 	}
 }
+
+func Help() {
+	helpText := `
+Usage:
+  warp <command> [options]
+
+Commands:
+  install     Install a package.
+  remove      Remove a package.
+  search      List Nebrix for packages.
+  help        Show help for commands.
+
+General Options:
+  -h, --help    Show this help message.
+  -D, --docker  Install packages using Docker.
+  -G, --github  Install packages from GitHub.
+  --ssh, --http  Specify the installation method for GitHub packages (SSH or HTTP).
+
+Examples:
+  warp install mypackage -D
+  warp remove anotherpackage -G
+  warp search -D
+`
+	fmt.Println(helpText)
+}

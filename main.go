@@ -14,7 +14,7 @@ var (
 
 func main() {
 	if len(os.Args) < 2 {
-		help()
+		helper.Help()
 		os.Exit(1)
 	}
 
@@ -88,34 +88,9 @@ func main() {
 			install.RemovePackageDocker(packageName)
 		}
 	case "--help", "-h":
-		help()
+		helper.Help()
 	default:
 		fmt.Printf("ERROR: Unknown command: %s\n", command)
 		os.Exit(1)
 	}
-}
-
-func help() {
-	helpText := `
-Usage:
-  warp <command> [options]
-
-Commands:
-  install     Install a package.
-  remove      Remove a package.
-  search      List Nebrix for packages.
-  help        Show help for commands.
-
-General Options:
-  -h, --help    Show this help message.
-  -D, --docker  Install packages using Docker.
-  -G, --github  Install packages from GitHub.
-  --ssh, --http  Specify the installation method for GitHub packages (SSH or HTTP).
-
-Examples:
-  warp install mypackage -D
-  warp remove anotherpackage -G
-  warp search -D
-`
-	fmt.Println(helpText)
 }
