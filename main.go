@@ -67,6 +67,8 @@ func main() {
 			}
 		} else if dockerFlag {
 			install.DockerInstaller(packageName)
+		} else {
+			install.DefaultInstaller(packageName)
 		}
 	case "search":
 		if dockerFlag {
