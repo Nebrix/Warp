@@ -114,7 +114,7 @@ func getTag(packageName string) string {
 	case "windows":
 		cmd = exec.Command("powershell", "-Command", fmt.Sprintf("Invoke-RestMethod -Uri 'https://api.github.com/repos/Nebrix/%s/releases/latest' | Select-Object -ExpandProperty tag_name", packageName))
 	case "linux", "darwin":
-		cmd = exec.Command("sh", "-c", `curl -s "https://api.github.com/repos/Nebrix/%s/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/'`, packageName)
+		cmd = exec.Command("sh", "-c", `curl -s "https://api.github.com/repos/Nebrix/%s/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'`, packageName)
 	default:
 		fmt.Println("Unsupported operating system:", osName)
 		os.Exit(1)
