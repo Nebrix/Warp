@@ -149,22 +149,13 @@ func DefaultInstaller(packageName string) {
 			fmt.Println("Error running command:", err)
 			return
 		}
-	case "linux":
-		cmd := exec.Command("curl", "-OL", "https://github.com/Nebrix/"+packageName+"/releases/download/"+tag+"/"+packageName+"-"+osName)
+	case "linux", "darwin":
+		cmd := exec.Command("wget", "https://github.com/Nebrix/"+packageName+"/releases/download/"+tag+"/"+packageName+"-"+osName)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		err := cmd.Run()
 		if err != nil {
-			fmt.Println("Error running curl:", err)
-			return
-		}
-	case "darwin":
-		cmd := exec.Command("curl", "-OL", "https://github.com/Nebrix/"+packageName+"/releases/download/"+tag+"/"+packageName+"-"+osName)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println("Error running curl:", err)
+			fmt.Println("Error running wget:", err)
 			return
 		}
 	default:
