@@ -167,5 +167,7 @@ func DefaultInstaller(packageName string) {
 			fmt.Println("Error running curl:", err)
 			return
 		}
+	default:
+		fmt.Println("Unsupported OS")
 	}
 }
