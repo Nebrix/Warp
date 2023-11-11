@@ -112,9 +112,9 @@ func getTag(packageName string) string {
 	var cmd *exec.Cmd
 	switch osName {
 	case "windows":
-		cmd = exec.Command("powershell", "-Command", fmt.Sprintf("Invoke-RestMethod -Uri 'https://api.github.com/repos/Nebrix/%s/releases/latest' | Select-Object -ExpandProperty tag_name", packageName))
+		cmd = exec.Command("powershell", "-Command", fmt.Sprintf("(Invoke-RestMethod -Uri 'https://api.github.com/repos/Nebrix/%s/releases/latest').tag_name", packageName))
 	case "linux", "darwin":
-		cmd = exec.Command("sh", "-c", `curl -s "https://api.github.com/repos/Nebrix/%s/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'`, packageName)
+		cmd = exec.Command("sh", "-c", fmt.Sprintf(`curl -s "https://api.github.com/repos/Nebrix/%s/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'`, packageName))
 	default:
 		fmt.Println("Unsupported operating system:", osName)
 		os.Exit(1)
@@ -122,7 +122,7 @@ func getTag(packageName string) string {
 
 	output, err := cmd.Output()
 	if err != nil {
-		fmt.Println("Error running git ls-remote:", err)
+		fmt.Println("Error running command:", err)
 		os.Exit(1)
 	}
 
