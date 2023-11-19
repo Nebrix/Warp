@@ -112,9 +112,9 @@ func getTag(packageName string) string {
 	var cmd *exec.Cmd
 	switch osName {
 	case "windows":
-		cmd = exec.Command("powershell", "-Command", fmt.Sprintf("(Invoke-RestMethod -Uri 'https://api.github.com/repos/Nebrix/%s/releases/latest').tag_name", packageName))
+		cmd = exec.Command("powershell", "-Command", fmt.Sprintf("(Invoke-RestMethod -Uri 'https://api.github.com/repos/Nebrix/%v/releases/latest').tag_name", packageName))
 	case "linux", "darwin":
-		cmd = exec.Command("sh", "-c", fmt.Sprintf(`curl -s "https://api.github.com/repos/Nebrix/%s/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'`, packageName))
+		cmd = exec.Command("sh", "-c", fmt.Sprintf(`curl -s "https://api.github.com/repos/Nebrix/%v/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'`, packageName))
 	default:
 		fmt.Println("Unsupported operating system:", osName)
 		os.Exit(1)
@@ -130,14 +130,14 @@ func getTag(packageName string) string {
 	return tagNumber
 }
 
-func DefaultInstaller(packageName string) {
+func DefaultInstaller(packageName string, systemTag string) {
 	osName := runtime.GOOS
 	tag := getTag(packageName)
 
 	switch osName {
 	case "windows":
-		url := fmt.Sprintf("https://github.com/Nebrix/%s/releases/download/%s/%s-%s.exe", packageName, tag, packageName, osName)
-		outputFileName := fmt.Sprintf("%s-%s.exe", packageName, osName)
+		url := fmt.Sprintf("https://github.com/Nebrix/%v/releases/download/%v/%v-%v-%v.exe", packageName, tag, packageName, osName, systemTag)
+		outputFileName := fmt.Sprintf("%v-%v.exe", packageName, osName)
 
 		cmd := exec.Command("powershell", "-Command", "Invoke-WebRequest", url, "-OutFile", outputFileName)
 
@@ -150,7 +150,7 @@ func DefaultInstaller(packageName string) {
 			return
 		}
 	case "linux", "darwin":
-		cmd := exec.Command("wget", "https://github.com/Nebrix/"+packageName+"/releases/download/"+tag+"/"+packageName+"-"+osName)
+		cmd := exec.Command("wget", "https://github.com/Nebrix/"+packageName+"/releases/download/"+tag+"/"+packageName+"-"+osName+"-"+systemTag)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		err := cmd.Run()

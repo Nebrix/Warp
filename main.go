@@ -47,6 +47,7 @@ func main() {
 		}
 
 		packageName := restArgs[0]
+		systemTag := restArgs[1]
 
 		if githubFlag {
 			if len(restArgs) < 2 {
@@ -68,7 +69,7 @@ func main() {
 		} else if dockerFlag {
 			install.DockerInstaller(packageName)
 		} else {
-			install.DefaultInstaller(packageName)
+			install.DefaultInstaller(packageName, systemTag)
 		}
 	case "search":
 		if dockerFlag {
