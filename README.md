@@ -1,33 +1,52 @@
-# Warp Installation Guide
+# Warp - Go Package Manger
 
-## Building for Your System
-If you are using any system, you can compile Warp using the following command:
+Warp is a simple cross-platform package manager developed in Golang.
+
+<!-- TOC -->
+- [Installation](#installation)
+    - [Building from source](#build-the-binary)
+    - [Installing the binary](#download-binary-recommended)
+- [Usage](#usage)
+- [Features](#features)
+    - [Todo](#future-updates)
+- [Contribution](#contribution)
+- [License](#license)
+<!-- TOC -->
+
+## Installation 
+
+### From Github
+
 ```
-go build -o warp main.go
-```
-Create an alias for your executable with the following command:
-```
-alias warp='~/path/to/your/executable/warp'
+git clone https://github.com/Nebrix/Warp.git
 ```
 
-This ensures the compilation and building of Warp tailored to your system.
+### Build the binary
 
-
-## Installing a package
-Use the following command to install a package:
 ```
-warp install <package-name> <sysetm archetype>
+make build
 ```
 
-### Example 
+## Download Binary (Recommended)
+
+You can download the latest binary from the [releases page](https://github.com/Nebrix/Warp/releases).
+
+### Usage 
+
+Once you have Warp installed, you can use it as follows:
+
 ```
-warp install pegasus amd64
+# Example usage
+Warp install <package-name>
 ```
-To install a package from a GitHub repository:
-```
-warp install <package-name> --github/-G (clone-method) --http/--ssh
-```
-To install via docker
-```
-warp install <package-name> --docker/-D
-```
+
+## Features 
+- Cross-platform support
+- Simple and lightweight
+
+## Contributing
+Feel free to contribute by opening issues or submitting pull requests.
+
+## License
+
+This project is licensed under the [MIT](https://github.com/Nebrix/Warp/blob/main/LICENSE)
