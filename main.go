@@ -25,6 +25,14 @@ func main() {
 
 		packageName := restArgs[0]
 		cmd.Installer(packageName)
+	case "uninstall":
+		if len(restArgs) < 1 {
+			fmt.Println("ERROR: You must provide a package name to remove.")
+			os.Exit(1)
+		}
+
+		packageName := restArgs[0]
+		cmd.Uninstaller(packageName)
 	case "list":
 		cmd.ListRepos()
 	case "--help", "-h":

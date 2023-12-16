@@ -55,7 +55,7 @@ func getFileSize(repoName string) (int64, error) {
 }
 
 func ListRepos() error {
-	url := fmt.Sprintf("https://api.github.com/users/Nebrix/repos")
+	url := "https://api.github.com/users/Nebrix/repos"
 
 	response, err := http.Get(url)
 	if err != nil {
@@ -161,6 +161,28 @@ func Installer(packageName string) {
 		}
 	default:
 		fmt.Println("Unsupported OS")
+	}
+}
+
+func Uninstaller(packageName string) {
+	osName := runtime.GOOS
+	systemTag := runtime.GOARCH
+
+	switch osName {
+	case "windows":
+		cmd := exec.Command("cmd", "/C", "del", fmt.Sprintf("%v-%v-%v.exe", packageName, osName, systemTag))
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println("Error running command:", err)
+			return
+		}
+	case "linux", "darwin":
+		cmd := exec.Command("rm", "-rf", fmt.Sprintf("%v-%v-%v", packageName, osName, systemTag))
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println("Error running commnad:", err)
+			return
+		}
 	}
 }
 
